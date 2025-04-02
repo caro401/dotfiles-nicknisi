@@ -133,3 +133,6 @@ eval "$(atuin init zsh)"
 eval "$(~/.local/bin/mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval $(thefuck --alias)
+
+
+. "$HOME/.cargo/env"
