@@ -30,6 +30,7 @@ brew "abcmidi"
 brew "atuin"
 brew "bat" # better cat
 brew "cloc" # lines of code counter
+brew "eza" # ls alternative
 brew "fd" # find alternative
 brew "git" # Git version control (latest version)
 brew "git-delta" # a better git diff

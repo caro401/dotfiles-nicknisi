@@ -82,11 +82,37 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
+# define the code directory
+# This is where my code exists and where I want the `c` autocomplete to work from exclusively
+if [[ -d /src ]]; then
+    export CODE_DIR=/src
+elif [[ -d /Volumes/source ]]; then
+    export CODE_DIR=/Volumes/source
+fi
+
+if [[ -d $DOTFILES/zsh/functions ]]; then
+    for func in $DOTFILES/zsh/functions/*(:t); autoload -U $func
+fi
+export REPORTTIME=10
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY          # write the history file in the ":start:elapsed;command" format.
+setopt HIST_REDUCE_BLANKS        # remove superfluous blanks before recording entry.
+setopt SHARE_HISTORY             # share history between all sessions.
+setopt HIST_IGNORE_ALL_DUPS      # delete old recorded entry if new entry is a duplicate.
+
+# look for all .zsh files and source them
+config_files=($DOTFILES/**/*.zsh)
+for file in $config_files[@]; do
+  source "$file"
+done
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -100,47 +126,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias rm=trash
-alias gst="git status"
-alias gcm="git commit -m "
-alias glp='git log --graph --abbrev-commit --decorate --format=format:"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n%C(white)%s%C(reset)%C(dim white)- %an%C(reset)"'
 eval "$(starship init zsh)"
-
 STARSHIP_CONFIG=~/.config/starship.toml
-#source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-#source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-#chruby ruby-3.1.2
 
-
-
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-export PATH="$HOME/.poetry/bin:$PATH"
-if command -v pyenv &>/dev/null; then
-    eval "$(pyenv init -)"
-fi
-if command -v pyenv-virtualenv &>/dev/null; then
-    eval "$(pyenv virtualenv-init -)"
-fi
-
-
-# pnpm
-#export PNPM_HOME="/Users/caro/Library/pnpm"
-#case ":$PATH:" in
-#  *":$PNPM_HOME:"*) ;;
-#  *) export PATH="$PNPM_HOME:$PATH" ;;
-#esac
-# pnpm end
-
-
-
-eval "$(mise activate zsh)"
 eval "$(atuin init zsh)"
-eval "$(mise activate zsh)"
+eval "$(~/.local/bin/mise activate zsh)"
+eval "$(zoxide init zsh)"
 eval $(thefuck --alias)
-
-# Added by Windsurf
-export PATH="/Users/caro/.codeium/windsurf/bin:$PATH"
-
