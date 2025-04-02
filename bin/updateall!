@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+echo -e "Updating Homebrew packages..."
+brew upgrade
+brew cleanup
+echo -e
+
+echo -e "Updating Neovim plugins..."
+nvim --headless "+Lazy! sync" +qa
+
+echo -e
+
+echo -e "Updating mise plugins..."
+mise up
+mise prune
