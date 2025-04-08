@@ -17,6 +17,9 @@ return {
     filesystem = {
       filtered_items = {
         hide_dotfiles = false,
+        always_show_by_pattern = {
+          ".env*", -- explicitly show .env files, even though they are gitignored
+        },
       },
 
       window = {
