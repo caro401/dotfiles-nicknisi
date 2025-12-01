@@ -1,4 +1,4 @@
-.DS_Store
+**/.DS_Store
 Thumbs.db
 *~
 *.swp
@@ -21,49 +21,5 @@ tscommand*.txt
 
 # npm things
 npm-debug.log
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
-
-**/.claude/settings.local.json
 
 **/.claude/settings.local.json
