@@ -136,3 +136,11 @@ eval $(thefuck --alias)
 
 
 . "$HOME/.cargo/env"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/caro/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+
+# opencode
+export PATH=/Users/caro/.opencode/bin:$PATH

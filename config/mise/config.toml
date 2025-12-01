@@ -16,3 +16,6 @@ ghq = "latest"
 pre-commit = "latest"
 caddy = "latest"
 sqlite = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = []
