@@ -90,7 +90,7 @@ fi
 
 # define the code directory
 # This is where my code exists and where I want the `c` autocomplete to work from exclusively
-if [[ -d /src ]]; then
+if [[ -d /Users/caro/src ]]; then
     export CODE_DIR=/src
 elif [[ -d /Volumes/source ]]; then
     export CODE_DIR=/Volumes/source
@@ -131,6 +131,7 @@ STARSHIP_CONFIG=~/.config/starship.toml
 
 eval "$(atuin init zsh)"
 eval "$(~/.local/bin/mise activate zsh)"
+eval "$(/opt/homebrew/bin/mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval $(thefuck --alias)
 

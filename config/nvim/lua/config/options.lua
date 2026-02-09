@@ -6,3 +6,4 @@ vim.g.snacks_animate = false
 vim.g.ai_cmp = true
 vim.g.deprecation_warnings = true
 vim.opt.wrap = false
+vim.opt.textwidth = 110

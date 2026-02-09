@@ -4,6 +4,7 @@
 
 # TODO make this better/at least point at the right repo
 export DOTFILES="/Volumes/source/github.com/caro401/dotfiles-nicknisi"
+export DOTFILES="/Users/caro/src/github.com/caro401/dotfiles-nicknisi"
 export CACHEDIR="$HOME/.local/share"
 export VIM_TMP="$HOME/.vim-tmp"
 # add a config file for ripgrep
