@@ -10,10 +10,10 @@ return {
         maximise_menu_panel = false,
         -- Hide the Strudel menu panel (and handle)
         -- (optional, default: false)
-        hide_menu_panel = true,
+        hide_menu_panel = false,
         -- Hide the default Strudel top bar (controls)
         -- (optional, default: false)
-        hide_top_bar = true,
+        hide_top_bar = false,
         -- Hide the Strudel code editor
         -- (optional, default: false)
         hide_code_editor = false,
