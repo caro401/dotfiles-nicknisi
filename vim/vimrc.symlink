@@ -9,9 +9,49 @@ packadd! editorconfig     " honour .editorconfig files
 packadd! hlyank           " flash yanked text so you see what you grabbed
 packadd! nohlsearch       " clear search highlight once you move on
 
+" ---------- plugins (vim-plug) ----------
+" :PlugInstall   fetch anything listed here that isn't installed yet
+" :PlugUpdate    pull the latest for all of them
+" :PlugClean     delete directories for plugins no longer listed here
+" :PlugStatus    what's installed, and whether it's up to date
+"
+" To make two machines match exactly:
+"   :PlugSnapshot ~/.vim/plug-snapshot.vim
+" writes a script pinning every plugin to its current commit. Source that
+" script on the other machine and it checks out the same versions.
+"
+" vim-plug itself is a single file at ~/.vim/autoload/plug.vim. On a new
+" machine, before this vimrc will work:
+"   curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+"     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+call plug#begin('~/.vim/plugged')
+
+Plug 'yegappan/lsp'                            " LSP client — replaces ~11 nvim plugins
+Plug 'junegunn/fzf.vim'                        " fuzzy finding — replaces telescope
+Plug 'preservim/nerdtree'                      " file tree — replaces neo-tree
+Plug 'elixir-editors/vim-elixir'               " vim ships NO elixir syntax at all
+Plug 'airblade/vim-gitgutter'                  " gutter diff markers — replaces gitsigns
+Plug 'vim-test/vim-test'                       " test runner — replaces neotest
+Plug 'catppuccin/vim', { 'as': 'catppuccin' }  " 'as' — the repo is just named "vim"
+
+call plug#end()
+" plug#end() is what adds the plugins to 'runtimepath', so anything depending
+" on one — the colourscheme below — has to come after it. It also runs
+" `filetype plugin indent on` and `syntax on`, so those aren't repeated here.
+
 " ---------- core ----------
+" plug#end() already ran both of these; kept explicit because the second one
+" is load-bearing and easy to delete by accident.
+"
+" Indentation has three layers, and this is only the bottom one:
+"   1. .editorconfig, via `packadd! editorconfig` above — the project's rules
+"   2. the formatter on save (mix format, rustfmt, prettier, ruff) via LSP
+"   3. this line — vim's own per-language guesses
+" Layers 1 and 2 are the real authorities. This one only governs what happens
+" WHILE TYPING, before anything formats. Without it vim falls back to
+" shiftwidth=8 and literal tabs, so an Elixir file looks wrong until you save.
 syntax on
-filetype plugin indent on   " per-language indent: rust 4, elixir 2, python 4
+filetype plugin indent on
 let mapleader = " "
 
 " ---------- display ----------
@@ -59,7 +99,9 @@ endif
 " asks the terminal which it is at startup — so this follows the OS theme.
 " vim 9.2 bundles its own older catppuccin; packadd! puts ours first in the
 " runtimepath, because only ours defines the LSP diagnostic highlight groups.
-packadd! catppuccin
+" vim 9.2 bundles its own older catppuccin, which has none of the LSP
+" diagnostic highlight groups. vim-plug puts the real plugin earlier in
+" 'runtimepath', so this picks up the plugin's copy, not vim's.
 silent! colorscheme catppuccin
 
 " ---------- filetypes vim doesn't know ----------

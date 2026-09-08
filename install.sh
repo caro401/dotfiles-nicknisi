@@ -202,6 +202,30 @@ setup_macos() {
   fi
 }
 
+setup_vim() {
+  title "Setting up Vim"
+
+  # vim-plug is a single file that has to exist before ~/.vimrc will load,
+  # because the vimrc calls plug#begin() at the top. Chicken and egg: it can't
+  # install itself from inside vim.
+  local plug="$HOME/.vim/autoload/plug.vim"
+  if [ -f "$plug" ]; then
+    info "vim-plug already installed"
+  else
+    info "Installing vim-plug"
+    curl -fLo "$plug" --create-dirs \
+      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim ||
+      error "Failed to download vim-plug"
+  fi
+
+  # --sync makes PlugInstall block until it finishes, rather than returning
+  # immediately and quitting before the clones are done.
+  info "Installing vim plugins"
+  vim -Es -u "$HOME/.vimrc" -c 'PlugInstall --sync' -c 'qa!' </dev/null >/dev/null 2>&1
+
+  info "Language servers come from the Brewfile; Astro's comes from mise"
+}
+
 case "$1" in
 backup)
   backup
@@ -218,14 +242,18 @@ homebrew)
 macos)
   setup_macos
   ;;
+vim)
+  setup_vim
+  ;;
 all)
   setup_symlinks
   setup_homebrew
+  setup_vim
   setup_git
   setup_macos
   ;;
 *)
-  echo -e $"\nUsage: $(basename "$0") {backup|link|git|homebrew||macos|all}\n"
+  echo -e $"\nUsage: $(basename "$0") {backup|link|git|homebrew|vim|macos|all}\n"
   exit 1
   ;;
 esac
