@@ -1,0 +1,238 @@
+" ~/.vimrc — ported from LazyVim, 8 Sept 2026
+" Every line here was an explicit decision. Reasoning is in
+" ~/Documents/journal/2026-09-08 Porting my LazyVim config to plain vim.md
+
+" ---------- bundled packages (already shipped with vim 9.2) ----------
+packadd! comment          " gc / gcc to toggle comments
+packadd! matchit          " % jumps between if/end, tags, brackets
+packadd! editorconfig     " honour .editorconfig files
+packadd! hlyank           " flash yanked text so you see what you grabbed
+packadd! nohlsearch       " clear search highlight once you move on
+
+" ---------- core ----------
+syntax on
+filetype plugin indent on   " per-language indent: rust 4, elixir 2, python 4
+let mapleader = " "
+
+" ---------- display ----------
+set number relativenumber   " gutter counts distance from cursor
+set cursorline
+set scrolloff=4             " keep 4 lines of context below cursor
+set sidescrolloff=8
+set signcolumn=yes          " reserve gutter so text never shifts sideways
+set termguicolors           " 24-bit colour, for catppuccin
+set nowrap
+set linebreak               " if wrap is ever on, break at spaces
+set textwidth=110
+set noshowmode
+set laststatus=2            " vim has no global statusline (max is 2)
+
+" ---------- behaviour ----------
+set mouse=                  " off, deliberately — also restores cmd-C in the terminal
+set clipboard=unnamed       " yank goes straight to the macOS clipboard
+set ignorecase smartcase    " 'foo' finds Foo; 'Foo' finds only Foo
+set confirm                 " :q on a dirty buffer asks instead of erroring
+set noswapfile              " no .swp clutter — autosave below covers it
+set noundofile              " undo history dies with the session
+set updatetime=200
+set completeopt=menuone,noselect
+
+" 'ttimeout' gives key codes their own, shorter timer than mappings. Arrow and
+" function keys arrive as escape sequences, so without it vim waits the full
+" 1000ms mapping timeout before deciding an Esc was a lone Esc. Vim's
+" defaults.vim sets this, but having a ~/.vimrc at all stops defaults.vim
+" loading, so it has to be set here. 'timeoutlen' stays at vim's default.
+set ttimeout ttimeoutlen=10
+set splitbelow splitright   " new splits go down and right
+set wildmenu wildmode=longest:full,full
+set path+=**                " :find searches recursively
+set shortmess+=I
+
+" ---------- :grep via ripgrep ----------
+if executable('rg')
+  set grepprg=rg\ --vimgrep
+  set grepformat=%f:%l:%c:%m
+endif
+
+" ---------- colourscheme ----------
+" catppuccin uses Latte on a light background and Mocha on a dark one, and vim
+" asks the terminal which it is at startup — so this follows the OS theme.
+" vim 9.2 bundles its own older catppuccin; packadd! puts ours first in the
+" runtimepath, because only ours defines the LSP diagnostic highlight groups.
+packadd! catppuccin
+silent! colorscheme catppuccin
+
+" ---------- filetypes vim doesn't know ----------
+" (.astro needs nothing — vim 9.2 detects it in autoload/dist/ft.vim and ships
+" its own syntax/astro.vim)
+" vim-elixir detects .heex but ships no syntax/heex.vim, so nothing loads and
+" the file comes up unhighlighted. Its eelixir syntax is HEEx-aware — it has
+" heexComponentName for <.component> and colours {@assign} interpolation — so
+" pointing .heex at eelixir gets the real thing, not an approximation.
+autocmd BufRead,BufNewFile *.heex set filetype=eelixir
+
+" ---------- autocmds ----------
+augroup vimrc
+  autocmd!
+
+  " autosave on focus loss, leaving insert, and any change
+  " the flag lets the formatter below tell an autosave from a real :w
+  autocmd FocusLost,InsertLeave,TextChanged *
+        \ let g:autosaving = 1 | silent! update | let g:autosaving = 0
+
+  " reload files changed on disk (git checkout under you)
+  autocmd FocusGained,BufEnter * silent! checktime
+
+  " re-ask the terminal whether it's light or dark, so an OS theme flip lands
+  autocmd FocusGained * set background&
+
+  " reopen a file where you left off
+  autocmd BufReadPost *
+        \ if line("'\"") >= 1 && line("'\"") <= line("$") && &filetype !~# 'commit'
+        \ |   execute "normal! g`\""
+        \ | endif
+
+  " create missing parent directories when saving a new path
+  autocmd BufWritePre *
+        \ if empty(&buftype) && expand('<afile>') !~# '^\w\+://'
+        \ |   call mkdir(expand('<afile>:p:h'), 'p')
+        \ | endif
+
+  " re-equalise splits when the terminal window is resized
+  autocmd VimResized * wincmd =
+
+  " q closes help / quickfix / man panels
+  autocmd FileType help,qf,man nnoremap <buffer><silent> q :close<CR>
+augroup END
+
+" ---------- window navigation ----------
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" ---------- move lines up/down ----------
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+inoremap <A-j> <Esc>:m .+1<CR>==gi
+inoremap <A-k> <Esc>:m .-2<CR>==gi
+xnoremap <A-j> :m '>+1<CR>gv=gv
+xnoremap <A-k> :m '<-2<CR>gv=gv
+
+" ---------- quickfix navigation ----------
+nnoremap <silent> ]q :cnext<CR>
+nnoremap <silent> [q :cprevious<CR>
+
+" ---------- terminal ----------
+" ++close makes the window disappear when the shell exits, so Ctrl-D closes the
+" whole thing in one keystroke without leaving terminal mode first.
+" To get to Terminal-Normal mode (to scroll or copy output): CTRL-W N.
+" An <Esc><Esc> mapping does NOT work here — terminal vim forwards Esc to the
+" job before a mapping can match it, see :help terminal-typing. It is not a
+" timeout or keyboard-protocol problem; both were tested and ruled out.
+nnoremap <leader>wt :term ++close<CR>
+nnoremap <leader>gg :term ++close lazygit<CR>
+
+" =====================================================================
+" Plugins — ~/.vim/pack/plugins/start/, plain git clones, no manager
+" =====================================================================
+
+" ---------- fzf : replaces telescope ----------
+" fzf.vim needs fzf's own vim files, which ship with the brew formula
+if isdirectory('/opt/homebrew/opt/fzf')
+  set runtimepath+=/opt/homebrew/opt/fzf
+elseif isdirectory('/usr/local/opt/fzf')
+  set runtimepath+=/usr/local/opt/fzf
+endif
+" fzf's built-in file walker ignores .gitignore, so in an Elixir project :Files
+" offers all of deps/ and _build/ — 27,500 entries instead of 1,055. fd honours
+" .gitignore, so gitignored files stay out (.env) while dotfiles that are
+" tracked stay in (.credo.exs). Set here, not in the shell, so terminal fzf is
+" unaffected.
+if executable('fd')
+  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --exclude .git'
+endif
+nnoremap <leader>ff :Files<CR>
+nnoremap <leader>fg :Rg<CR>
+nnoremap <leader>fb :Buffers<CR>
+
+" ---------- NERDTree : replaces neo-tree ----------
+let g:NERDTreeShowHidden = 1     " show dotfiles, including .env
+let g:NERDTreeWinPos = 'right'   " same side as your neo-tree
+" \ reveals the current file, or closes the tree if it's already open
+nnoremap <silent><expr> \ g:NERDTree.IsOpen() ? ':NERDTreeClose<CR>' : ':NERDTreeFind<CR>'
+
+" ---------- vim-test : replaces neotest ----------
+" 'vimterminal' runs the test command in a vim terminal split — the same kind
+" of window <Space>wt opens, so output behaves the way you already expect.
+let g:test#strategy = 'vimterminal'
+nmap <silent> <leader>tt :TestNearest<CR>
+nmap <silent> <leader>tf :TestFile<CR>
+nmap <silent> <leader>ta :TestSuite<CR>
+nmap <silent> <leader>tl :TestLast<CR>
+
+" ---------- gitgutter : replaces gitsigns ----------
+" Defaults are fine. It uses 'updatetime' (200 above) to decide how quickly
+" signs refresh, and needs the signcolumn that's already always-on.
+
+" ---------- LSP : replaces 11 nvim plugins ----------
+" Servers are registered only if the binary exists, so this file stays
+" portable across machines that don't have every language installed.
+" The plugin reads these two variables directly when it loads, which avoids
+" depending on when the User LspSetup event fires.
+let g:lsp_options = {
+      \ 'autoComplete': v:true,
+      \ 'autoHighlightDiags': v:true,
+      \ 'semanticHighlight': v:true,
+      \ 'showDiagInPopup': v:true,
+      \ }
+
+" Servers are registered only if the binary exists, so this file stays
+" portable across machines that don't have every language installed.
+let g:lsp_servers = filter([
+      \ {'name': 'rustanalyzer',
+      \  'filetype': ['rust'],
+      \  'path': 'rust-analyzer', 'args': []},
+      \ {'name': 'elixirls',
+      \  'filetype': ['elixir', 'eelixir', 'heex'],
+      \  'path': 'elixir-ls', 'args': []},
+      \ {'name': 'pyright',
+      \  'filetype': ['python'],
+      \  'path': 'pyright-langserver', 'args': ['--stdio']},
+      \ {'name': 'tsserver',
+      \  'filetype': ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'],
+      \  'path': 'typescript-language-server', 'args': ['--stdio']},
+      \ {'name': 'tailwindcss',
+      \  'filetype': ['html', 'css', 'astro', 'javascriptreact', 'typescriptreact'],
+      \  'path': 'tailwindcss-language-server', 'args': ['--stdio']},
+      \ {'name': 'astrols',
+      \  'filetype': ['astro'],
+      \  'path': 'astro-ls', 'args': ['--stdio']},
+      \ ], 'executable(v:val.path)')
+
+augroup vimrclsp
+  autocmd!
+  " keys only bind in buffers that actually have a server attached
+  autocmd User LspAttached call s:LspKeys()
+augroup END
+
+function! s:LspKeys() abort
+  nnoremap <buffer><silent> gd :LspGotoDefinition<CR>
+  nnoremap <buffer><silent> gr :LspShowReferences<CR>
+  nnoremap <buffer><silent> K  :LspHover<CR>
+  nnoremap <buffer><silent> <leader>cr :LspRename<CR>
+  nnoremap <buffer><silent> <leader>ca :LspCodeAction<CR>
+  nnoremap <buffer><silent> ]d :LspDiag next<CR>
+  nnoremap <buffer><silent> [d :LspDiag prev<CR>
+endfunction
+
+" ---------- format on explicit :w only ----------
+" Deliberately not on the autosave above — that would reformat mid-thought.
+augroup vimrcformat
+  autocmd!
+  autocmd User LspAttached let b:lsp_attached = 1
+  autocmd BufWritePre *
+        \ if !get(g:, 'autosaving', 0) && get(b:, 'lsp_attached', 0)
+        \ |   silent! LspFormat
+        \ | endif
+augroup END

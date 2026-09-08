@@ -15,6 +15,8 @@ pre-commit = "latest"
 caddy = "latest"
 sqlite = "latest"
 node = "24"
+ghcup = "latest"
+"npm:@astrojs/language-server" = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = []

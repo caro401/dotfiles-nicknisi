@@ -1,5 +1,18 @@
 theme = dark:Catppuccin Mocha,light:Catppuccin Latte
 
-font-family = "FiraCode Nerd Font Mono"
+font-family = "Moxy"
 keybind = global:cmd+grave_accent=toggle_quick_terminal
 keybind = shift+enter=text:\n
+
+# Send Alt when Option is pressed, so terminal apps see <A-j> etc.
+# Needed for vim's <A-j>/<A-k> line-move mappings in ~/.vimrc.
+#
+# Set explicitly because the default is NOT a fixed value: unset, Ghostty
+# decides from the active keyboard layout — true for U.S. Standard and U.S.
+# International, false for everything else including British. That means the
+# same dotfiles behave differently per machine, and the failure is silent:
+# the key just does nothing. Pinning it here makes every machine agree.
+#
+# Trade-off: inside Ghostty only, Option+letter no longer types unicode
+# characters (∆ ø ≈ –). Every other app is unaffected.
+macos-option-as-alt = true

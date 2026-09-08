@@ -32,6 +32,7 @@ brew "bat" # better cat
 brew "cloc" # lines of code counter
 brew "eza" # ls alternative
 brew "fd" # find alternative
+brew "fzf" # fuzzy finder — install.sh runs its installer, and vim's fzf.vim needs it
 brew "git" # Git version control (latest version)
 brew "git-delta" # a better git diff
 brew "git-lfs"
@@ -49,3 +50,14 @@ cask "wakatime"
 brew "wget" # internet file retriever
 brew "z" # switch between most used directories
 brew "zoxide" # switch between most used directories
+
+# language servers — vim talks to these via yegappan/lsp (see vim/vimrc.symlink).
+# vim registers a server only if its binary exists, so a machine missing one
+# just quietly goes without it rather than erroring.
+brew "elixir-ls" # Elixir, Phoenix, Ash
+brew "pyright" # Python
+brew "ruff" # Python linting and formatting
+brew "rust-analyzer" # Rust
+brew "tailwindcss-language-server" # Tailwind class completion
+brew "typescript-language-server" # TypeScript and JavaScript
+# Astro's server has no brew formula; it's declared in config/mise/config.toml
